@@ -34,16 +34,16 @@ return {
         }
       })
       lspconfig.pyright.setup({
-        settings = {
-          pyright = {
-            disableOrganizeImports = true, -- using Ruff
-          },
-          python = {
-            analysis = {
-              ignore = { '*' }, -- using Ruff
-            },
-          },
-        },
+        --settings = {
+          --pyright = {
+            --disableOrganizeImports = true, -- using Ruff
+          --},
+          --python = {
+            --analysis = {
+              --ignore = { '*' }, -- using Ruff
+            --},
+          --},
+        --},
       })
 
       vim.keymap.set("n", "gD", vim.lsp.buf.declaration, {})
