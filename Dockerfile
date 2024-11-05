@@ -1,6 +1,7 @@
-FROM debian:bookworm
+# Base image
+FROM debian:trixie
 
-# Install system dependencies (including ImageMagick development files)
+# Set up system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     kitty \
@@ -13,93 +14,98 @@ RUN apt-get update && apt-get install -y \
     tmux \
     curl \
     git \
-    python3.11-venv \
     zsh \
-    zplug \
     file \
     procps \
     sudo \
     ueberzug \
-    libsqlite3-dev
+    python3.12-venv\
+    libsqlite3-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-# Create user and set appropriate permissions
+# Add user accounts and permissions
 RUN useradd -ms /bin/bash user && \
-    chown -R user:user /home/user
+    chown -R user:user /home/user && \
+    useradd -m -s /bin/zsh linuxbrew && \
+    usermod -aG sudo linuxbrew &&  \
+    mkdir -p /home/linuxbrew/.linuxbrew && \
+    chown -R linuxbrew: /home/linuxbrew/.linuxbrew
 
-RUN useradd -m -s /bin/bash linuxbrew && \
-    echo 'linuxbrew ALL=(ALL) NOPASSWD:ALL' >>/etc/sudoers
-
-# Install Neovim (using user permissions and improved download handling)
-RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz && \
-    rm -rf /opt/nvim && \
-    tar -C /opt -xzf nvim-linux64.tar.gz
-
+# Install Neovim
+RUN curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz && \
+    tar -C /opt -xzf nvim-linux64.tar.gz && \
+    rm nvim-linux64.tar.gz
 ENV PATH="/opt/nvim-linux64/bin:$PATH"
 
-# Install and configure zsh (ensure zsh is installed before running the script)
+# Configure Zsh with plugins
 RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v1.2.1/zsh-in-docker.sh)" -- \
     -p git \
     -p ssh-agent \
     -p https://github.com/zsh-users/zsh-autosuggestions \
     -p https://github.com/zsh-users/zsh-completions
 
+# Set working directory for user
 USER user
 WORKDIR /home/user
 
-# Install Quarto
-RUN git clone https://github.com/quarto-dev/quarto-cli
-WORKDIR /home/user/quarto-cli
-RUN ./configure.sh
-# Install magick rock 
-RUN luarocks --local --lua-version=5.1 install magick 
-# Install Homebrew (adapt path if needed — this uses a common location)
-USER linuxbrew
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
-USER root
-RUN chown -R $CONTAINER_USER: /home/linuxbrew/.linuxbrew/Cellar
-ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
+# Clone and configure Quarto CLI
+RUN git clone https://github.com/quarto-dev/quarto-cli && \
+    cd quarto-cli && ./configure.sh
 
-# Install your desired Homebrew packages 
-USER linuxbrew
-RUN brew update && \
-    brew doctor && \
-    brew install pyenv
+# Install Lua magick rock
+RUN luarocks --local --lua-version=5.1 install magick
+
+# # Install Homebrew under linuxbrew user
+# USER linuxbrew
+# RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+# USER root
+# RUN chown -R $CONTAINER_USER: /home/linuxbrew/.linuxbrew
+# ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
+# RUN git config --global --add safe.directory /home/linuxbrew/.linuxbrew/Homebrew
+# USER linuxbrew
+# RUN brew update && \
+#     brew doctor
+
+# # Install pyenv manually and set up Python
+# RUN curl https://pyenv.run | bash && \
+#     export PATH="$HOME/.pyenv/bin:$PATH" && \
+#     eval "$(pyenv init --path)" && \
+#     pyenv install 3.12 && \
+#     pyenv global 3.12
+
 USER user
-RUN pyenv install 3.12
-RUN pyenv global 3.12
-
-# Set up and activate the virtual environment
+# Configure virtual environment
 ENV VIRTUAL_ENV=/home/user/.virtualenvs/neovim
-RUN python3 -m venv $VIRTUAL_ENV
+RUN python3 -m venv $VIRTUAL_ENV && \
+    $VIRTUAL_ENV/bin/pip install --upgrade pip && \
+    $VIRTUAL_ENV/bin/pip install \
+        pynvim \
+        jupyter_client \
+        cairosvg \
+        plotly \
+        kaleido \
+        pyperclip \
+        nbformat \
+        pillow \
+        ipykernel
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Upgrade pip and install Python packages
-RUN pip install --upgrade pip \
-    pynvim \
-    jupyter_client \
-    cairosvg \
-    plotly \
-    kaleido \
-    pyperclip \
-    nbformat \
-    pillow \
-    ipykernel
-
-# Install IPython kernel
+# Install IPython kernel for Neovim
 RUN python3 -m ipykernel install --user --name neovim-kernel
 
-# Copy tmux config
-# WORKDIR /home/user/.config/tmux
-# RUN git clone https://github.com/markmno/tmux.conf.git .
-
-# Install cargo
-RUN  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+# Install Rust and Cargo dependencies
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/home/user/.cargo/bin:$PATH"
 RUN cargo install yazi-fm
 
-# Copy nvim config
-WORKDIR /home/user/.config/nvim
-RUN git clone https://github.com/markmno/nvim.conf.git .
+# Clone Neovim and Tmux configurations
+RUN mkdir -p /home/user/.config/nvim && \
+    git clone https://github.com/markmno/nvim.conf.git /home/user/.config/nvim && \
+    mkdir -p /home/user/.config/tmux && \
+    git clone https://github.com/markmno/tmux.conf.git /home/user/.config/tmux
 
-# Default command (start zsh shell)
-CMD ["/bin/bash"]
+RUN git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
+# Set default shell to Zsh
+CMD ["/bin/zsh"]
+
