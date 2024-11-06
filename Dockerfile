@@ -1,110 +1,93 @@
-# Base image
-FROM debian:trixie
+# Stage 1: Base system setup with essential dependencies
+FROM debian:trixie AS base
 
-# Set up system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    kitty \
-    ripgrep \
-    npm \
-    imagemagick \
-    libmagickwand-dev \
-    lua5.1 \
-    luarocks \
-    tmux \
-    curl \
-    git \
-    zsh \
-    file \
-    procps \
-    sudo \
-    ueberzug \
-    python3.12-venv\
-    libsqlite3-dev && \
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    TZ=Etc/UTC \
+    PATH="/opt/nvim-linux64/bin:/home/user/.cargo/bin:$PATH"
+
+# Install core dependencies needed for all stages
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    build-essential kitty ripgrep npm imagemagick libmagickwand-dev \
+    lua5.1 luarocks tmux curl git zsh file procps sudo ueberzug \
+    python3.12-venv libsqlite3-dev locales tzdata && \
+    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen && \
+    ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
+    dpkg-reconfigure --frontend noninteractive tzdata && \
     rm -rf /var/lib/apt/lists/*
+
+# Stage 2: Build stage - installs dependencies, downloads, and builds necessary components
+FROM base AS builder
+
+# Install Neovim (cached layer for Neovim download and extract)
+RUN curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz && \
+    tar -C /opt -xzf nvim-linux64.tar.gz && rm nvim-linux64.tar.gz
+
+# Install Rust and Cargo, and a Cargo package (yazi)
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+    . "$HOME/.cargo/env" && \
+    cargo install yazi-fm && \
+    rm -rf /root/.cargo/registry /root/.cargo/git
+
+# Install Quarto CLI
+RUN git clone https://github.com/quarto-dev/quarto-cli && \
+    cd quarto-cli && ./configure.sh && cd .. && rm -rf quarto-cli
+
+# Clone Neovim configuration and Tmux plugins
+RUN git clone https://github.com/markmno/nvim.conf.git /root/.config/nvim && \
+    mkdir -p /root/.tmux/plugins && \
+    git clone https://github.com/tmux-plugins/tpm /root/.tmux/plugins/tpm && \
+    echo "set -g @plugin 'tmux-plugins/tpm'" >> /root/.tmux.conf && \
+    echo "set -g @plugin 'arcticicestudio/nord-tmux'" >> /root/.tmux.conf && \
+    echo "set -g @plugin 'tmux-plugins/tmux-sensible'" >> /root/.tmux.conf && \
+    echo "set -g @plugin 'tmux-plugins/tmux-resurrect'" >> /root/.tmux.conf && \
+    echo "set-option -g default-shell /bin/zsh" >> ~/.tmux.conf && \
+    echo "set -g allow-passthrough all" >> ~/.tmux.conf && \
+    echo "set -ga update-environment TERM" >> ~/.tmux.conf && \
+    echo "set -ga update-environment TERM_PROGRAM" >> ~/.tmux.conf && \
+    echo "run '~/.tmux/plugins/tpm/tpm'" >> /root/.tmux.conf
+
+# Stage 3: Final runtime stage - configure environment for user and copy over essential assets
+FROM base AS final
 
 # Add user accounts and permissions
 RUN useradd -ms /bin/bash user && \
-    chown -R user:user /home/user && \
-    useradd -m -s /bin/zsh linuxbrew && \
-    usermod -aG sudo linuxbrew &&  \
-    mkdir -p /home/linuxbrew/.linuxbrew && \
-    chown -R linuxbrew: /home/linuxbrew/.linuxbrew
+    mkdir -p /home/user/.config/nvim && \
+    chown -R user:user /home/user
 
-# Install Neovim
-RUN curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz && \
-    tar -C /opt -xzf nvim-linux64.tar.gz && \
-    rm nvim-linux64.tar.gz
-ENV PATH="/opt/nvim-linux64/bin:$PATH"
+# Copy essential assets from build stage
+COPY --from=builder /opt/nvim-linux64 /opt/nvim-linux64
+COPY --from=builder /root/.config/nvim /home/user/.config/nvim
+COPY --from=builder /root/.tmux /home/user/.tmux
+COPY --from=builder /root/.tmux.conf /home/user/.tmux.conf
+COPY --from=builder /root/.cargo /home/user/.cargo
 
-# Configure Zsh with plugins
-RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v1.2.1/zsh-in-docker.sh)" -- \
-    -p git \
-    -p ssh-agent \
-    -p https://github.com/zsh-users/zsh-autosuggestions \
-    -p https://github.com/zsh-users/zsh-completions
-
-# Set working directory for user
+# Set environment paths for user
 USER user
 WORKDIR /home/user
-
-# Clone and configure Quarto CLI
-RUN git clone https://github.com/quarto-dev/quarto-cli && \
-    cd quarto-cli && ./configure.sh
-
-# Install Lua magick rock
-RUN luarocks --local --lua-version=5.1 install magick
-
-# # Install Homebrew under linuxbrew user
-# USER linuxbrew
-# RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-# USER root
-# RUN chown -R $CONTAINER_USER: /home/linuxbrew/.linuxbrew
-# ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
-# RUN git config --global --add safe.directory /home/linuxbrew/.linuxbrew/Homebrew
-# USER linuxbrew
-# RUN brew update && \
-#     brew doctor
-
-# # Install pyenv manually and set up Python
-# RUN curl https://pyenv.run | bash && \
-#     export PATH="$HOME/.pyenv/bin:$PATH" && \
-#     eval "$(pyenv init --path)" && \
-#     pyenv install 3.12 && \
-#     pyenv global 3.12
-
-USER user
-# Configure virtual environment
 ENV VIRTUAL_ENV=/home/user/.virtualenvs/neovim
+ENV PATH="$VIRTUAL_ENV/bin:/opt/nvim-linux64/bin:/home/user/.cargo/bin:$PATH"
+
+# Configure virtual environment and install Python packages
 RUN python3 -m venv $VIRTUAL_ENV && \
     $VIRTUAL_ENV/bin/pip install --upgrade pip && \
-    $VIRTUAL_ENV/bin/pip install \
-        pynvim \
-        jupyter_client \
-        cairosvg \
-        plotly \
-        kaleido \
-        pyperclip \
-        nbformat \
-        pillow \
-        ipykernel
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+    $VIRTUAL_ENV/bin/pip install pynvim jupyter_client cairosvg plotly kaleido pyperclip \
+    nbformat pillow ipykernel && \
+    python3 -m ipykernel install --user --name neovim-kernel
 
-# Install IPython kernel for Neovim
-RUN python3 -m ipykernel install --user --name neovim-kernel
+# Install Lua magick rock for image processing support
+RUN luarocks --local --lua-version=5.1 install magick
 
-# Install Rust and Cargo dependencies
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/home/user/.cargo/bin:$PATH"
-RUN cargo install yazi-fm
+# Minimal Zsh configuration
+RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
+    echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.zshrc && \
+    echo "alias ll='ls -lah --color=auto'" >> ~/.zshrc && \
+    echo "export LANG=C.UTF-8" >> ~/.zshrc
 
-# Clone Neovim and Tmux configurations
-RUN mkdir -p /home/user/.config/nvim && \
-    git clone https://github.com/markmno/nvim.conf.git /home/user/.config/nvim && \
-    mkdir -p /home/user/.config/tmux && \
-    git clone https://github.com/markmno/tmux.conf.git /home/user/.config/tmux
-
-RUN git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+# Install Tmux plugins at runtime
+RUN ~/.tmux/plugins/tpm/bin/install_plugins || true
 
 # Set default shell to Zsh
 CMD ["/bin/zsh"]
