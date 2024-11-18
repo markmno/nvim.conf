@@ -4,7 +4,9 @@ return {
     require("lualine").setup({
       options = {
         globalstatus=true,
-        theme = "auto"
+        theme = "auto",
+        component_separators = { left = '|', right = '|'},
+        section_separators = "",
       }
     })
   end

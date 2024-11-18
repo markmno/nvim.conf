@@ -3,7 +3,8 @@ FROM debian:trixie AS base
 
 ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
-    TZ=Etc/UTC \
+    TZ=Etc/UTC \ 
+    TERM=xterm-kitty \ 
     PATH="/opt/nvim-linux64/bin:/home/user/.cargo/bin:$PATH"
 
 # Install core dependencies needed for all stages
@@ -18,6 +19,11 @@ RUN apt-get update && \
     dpkg-reconfigure --frontend noninteractive tzdata && \
     rm -rf /var/lib/apt/lists/*
 
+# Add user accounts and permissions (needed in final stage)
+RUN useradd -ms /bin/bash user && \
+    mkdir -p /home/user && \
+    chown -R user:user /home/user
+
 # Stage 2: Build stage - installs dependencies, downloads, and builds necessary components
 FROM base AS builder
 
@@ -28,7 +34,7 @@ RUN curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-lin
 # Install Rust and Cargo, and a Cargo package (yazi)
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
     . "$HOME/.cargo/env" && \
-    cargo install yazi-fm && \
+    cargo install --locked yazi-fm yazi-cli && \
     rm -rf /root/.cargo/registry /root/.cargo/git
 
 # Install Quarto CLI
@@ -43,19 +49,15 @@ RUN git clone https://github.com/markmno/nvim.conf.git /root/.config/nvim && \
     echo "set -g @plugin 'arcticicestudio/nord-tmux'" >> /root/.tmux.conf && \
     echo "set -g @plugin 'tmux-plugins/tmux-sensible'" >> /root/.tmux.conf && \
     echo "set -g @plugin 'tmux-plugins/tmux-resurrect'" >> /root/.tmux.conf && \
-    echo "set-option -g default-shell /bin/zsh" >> ~/.tmux.conf && \
-    echo "set -g allow-passthrough all" >> ~/.tmux.conf && \
-    echo "set -ga update-environment TERM" >> ~/.tmux.conf && \
-    echo "set -ga update-environment TERM_PROGRAM" >> ~/.tmux.conf && \
-    echo "run '~/.tmux/plugins/tpm/tpm'" >> /root/.tmux.conf
+    echo "set -g default-terminal 'xterm-kitty'" >> /root/.tmux.conf && \
+    echo "set -g allow-passthrough all" >> /root/.tmux.conf && \
+    echo "set -ga update-environment TERM" >> /root/.tmux.conf && \
+    echo "set -ga update-environment TERM_PROGRAM" >> /root/.tmux.conf && \
+    echo "set-option -g default-shell /bin/zsh" >> /root/.tmux.conf && \
+    echo "run '~/.tmux/plugins/tpm/tpm'" >> /root/.tmux.conf 
 
 # Stage 3: Final runtime stage - configure environment for user and copy over essential assets
 FROM base AS final
-
-# Add user accounts and permissions
-RUN useradd -ms /bin/bash user && \
-    mkdir -p /home/user/.config/nvim && \
-    chown -R user:user /home/user
 
 # Copy essential assets from build stage
 COPY --from=builder /opt/nvim-linux64 /opt/nvim-linux64
@@ -64,7 +66,10 @@ COPY --from=builder /root/.tmux /home/user/.tmux
 COPY --from=builder /root/.tmux.conf /home/user/.tmux.conf
 COPY --from=builder /root/.cargo /home/user/.cargo
 
-# Set environment paths for user
+# Set ownership for user on copied files
+RUN chown -R user:user /home/user/.config /home/user/.tmux /home/user/.tmux.conf /home/user/.cargo
+
+# Set environment paths and switch to user
 USER user
 WORKDIR /home/user
 ENV VIRTUAL_ENV=/home/user/.virtualenvs/neovim
@@ -86,9 +91,8 @@ RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master
     echo "alias ll='ls -lah --color=auto'" >> ~/.zshrc && \
     echo "export LANG=C.UTF-8" >> ~/.zshrc
 
-# Install Tmux plugins at runtime
-RUN ~/.tmux/plugins/tpm/bin/install_plugins || true
+RUN mkdir -p ~/.local/share/jupyter/runtime && \
+    nvim --headless "+Lazy! sync" +qa
 
 # Set default shell to Zsh
 CMD ["/bin/zsh"]
-
