@@ -3,15 +3,15 @@ FROM debian:trixie AS base
 
 ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
-    TZ=Etc/UTC \ 
-    TERM=xterm-kitty \ 
+    TZ=Etc/UTC \
+    TERM=xterm-kitty \
     PATH="/opt/nvim-linux64/bin:/home/user/.cargo/bin:$PATH"
 
-# Install core dependencies needed for all stages
+# Install core dependencies and sudo
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    build-essential kitty ripgrep npm imagemagick libmagickwand-dev \
-    lua5.1 luarocks tmux curl git zsh file procps sudo ueberzug \
+    sudo build-essential kitty ripgrep npm imagemagick libmagickwand-dev \
+    lua5.1 luarocks tmux curl git zsh file procps ueberzug \
     python3.12-venv libsqlite3-dev locales tzdata && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen && \
@@ -19,10 +19,12 @@ RUN apt-get update && \
     dpkg-reconfigure --frontend noninteractive tzdata && \
     rm -rf /var/lib/apt/lists/*
 
-# Add user accounts and permissions (needed in final stage)
+# Add user with sudo privileges
 RUN useradd -ms /bin/bash user && \
     mkdir -p /home/user && \
-    chown -R user:user /home/user
+    chown -R user:user /home/user && \
+    echo "user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/user && \
+    chmod 0440 /etc/sudoers.d/user
 
 # Stage 2: Build stage - installs dependencies, downloads, and builds necessary components
 FROM base AS builder
@@ -69,7 +71,7 @@ COPY --from=builder /root/.cargo /home/user/.cargo
 # Set ownership for user on copied files
 RUN chown -R user:user /home/user/.config /home/user/.tmux /home/user/.tmux.conf /home/user/.cargo
 
-# Set environment paths and switch to user
+# Switch to the non-root user
 USER user
 WORKDIR /home/user
 ENV VIRTUAL_ENV=/home/user/.virtualenvs/neovim
@@ -96,3 +98,4 @@ RUN mkdir -p ~/.local/share/jupyter/runtime && \
 
 # Set default shell to Zsh
 CMD ["/bin/zsh"]
+
