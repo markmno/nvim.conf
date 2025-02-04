@@ -43,6 +43,17 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
 RUN git clone https://github.com/quarto-dev/quarto-cli && \
     cd quarto-cli && ./configure.sh && cd .. && rm -rf quarto-cli
 
+# Install pyenv
+ENV PYENV_ROOT="/root/.pyenv"
+ENV PATH="$PYENV_ROOT/bin:$PYENV_ROOT/shims:$PATH"
+
+RUN git clone https://github.com/pyenv/pyenv.git $PYENV_ROOT && \
+    echo 'export PYENV_ROOT="$HOME/.pyenv"' >> /root/.bashrc && \
+    echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> /root/.bashrc && \
+    echo 'eval "$(pyenv init --path)"' >> /root/.bashrc && \
+    echo 'eval "$(pyenv init -)"' >> /root/.bashrc && \
+    /bin/bash -c "source /root/.bashrc && pyenv install 3.12 && pyenv global 3.12"
+
 # Clone Neovim configuration and Tmux plugins
 RUN git clone https://github.com/markmno/nvim.conf.git /root/.config/nvim && \
     mkdir -p /root/.tmux/plugins && \
@@ -69,7 +80,7 @@ COPY --from=builder /root/.tmux.conf /home/user/.tmux.conf
 COPY --from=builder /root/.cargo /home/user/.cargo
 
 # Set ownership for user on copied files
-RUN chown -R user:user /home/user/.config /home/user/.tmux /home/user/.tmux.conf /home/user/.cargo
+RUN chown -R user:user /home/user/.config /home/user/.tmux /home/user/.tmux.conf /home/user/.cargo 
 
 # Switch to the non-root user
 USER user
@@ -77,12 +88,23 @@ WORKDIR /home/user
 ENV VIRTUAL_ENV=/home/user/.virtualenvs/neovim
 ENV PATH="$VIRTUAL_ENV/bin:/opt/nvim-linux64/bin:/home/user/.cargo/bin:$PATH"
 
+# Set up pyenv for user
+ENV PYENV_ROOT="/home/user/.pyenv"
+ENV PATH="$PYENV_ROOT/bin:$PYENV_ROOT/shims:$PATH"
+
+RUN echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc && \
+    echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc && \
+    echo 'eval "$(pyenv init --path)"' >> ~/.bashrc && \
+    echo 'eval "$(pyenv init -)"' >> ~/.bashrc && \
+    /bin/bash -c "source ~/.bashrc && pyenv global 3.12"
+
 # Configure virtual environment and install Python packages
-RUN python3 -m venv $VIRTUAL_ENV && \
-    $VIRTUAL_ENV/bin/pip install --upgrade pip && \
-    $VIRTUAL_ENV/bin/pip install pynvim jupyter_client cairosvg plotly kaleido pyperclip \
+RUN pyenv virtualenv 3.12 neovim-env && \
+    pyenv activate neovim-env && \
+    pip install --upgrade pip && \
+    pip install pynvim jupyter_client cairosvg plotly kaleido pyperclip \
     nbformat pillow ipykernel && \
-    python3 -m ipykernel install --user --name neovim-kernel
+    python -m ipykernel install --user --name neovim-kernel
 
 # Install Lua magick rock for image processing support
 RUN luarocks --local --lua-version=5.1 install magick
