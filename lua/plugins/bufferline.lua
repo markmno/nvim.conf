@@ -12,6 +12,13 @@ return {
 						separator = true,
 						text_align = "left",
 					},
+
+					{
+						filetype = "snacks_picker_list",
+						text = "Explorer",
+						separator = true,
+						text_align = "left",
+					},
 				},
 			},
 		})

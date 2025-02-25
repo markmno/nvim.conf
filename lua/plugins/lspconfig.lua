@@ -1,72 +1,120 @@
 return {
 	{
 		"williamboman/mason.nvim",
-		lazy = false,
+		-- event = "VimEnter",
 		config = function()
 			require("mason").setup()
 		end,
 	},
 	{
 		"williamboman/mason-lspconfig.nvim",
-		lazy = false,
+		dependencies = {
+			"williamboman/mason.nvim",
+			"neovim/nvim-lspconfig",
+			"hrsh7th/cmp-nvim-lsp",
+		},
 		config = function()
-			require("mason-lspconfig").setup({
-				ensure_installed = { "lua_ls", "ruff", "pyright", "clangd" },
-			})
-		end,
-	},
-	{
-		"neovim/nvim-lspconfig",
-		lazy = false,
-		config = function()
-			local capabilities = require("cmp_nvim_lsp").default_capabilities()
-
-			local lspconfig = require("lspconfig")
-			lspconfig.lua_ls.setup({
-				capabilities = capabilities,
-			})
-			lspconfig.ruff.setup({
-				capabilities = capabilities,
-				init_options = {
-					settings = {
-						args = {},
-					},
+			-- Configure diagnostics with virtual text
+			vim.diagnostic.config({
+				virtual_text = {
+					source = "if_many",
+					prefix = "●",
+					spacing = 4,
+				},
+				signs = true,
+				underline = true,
+				update_in_insert = false,
+				severity_sort = true,
+				float = {
+					border = "rounded",
+					source = "always",
+					header = "",
 				},
 			})
-			lspconfig.pyright.setup({
-				-- settings = {
-				--   pyright = {
-				--     disableOrganizeImports = true, -- using Ruff
-				--   },
-				--   -- python = {
-				--     -- analysis = {
-				--     --   ignore = { '*' }, -- using Ruff
-				--     -- },
-				--   },
-				-- },
+
+			-- Customize virtual text appearance
+			vim.api.nvim_set_hl(0, "DiagnosticVirtualTextError", { fg = "#db4b4b" })
+			vim.api.nvim_set_hl(0, "DiagnosticVirtualTextWarn", { fg = "#e0af68" })
+			vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { fg = "#0db9d7" })
+			vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#10B981" })
+
+			-- Configure LSP capabilities
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
+			capabilities.textDocument.completion.completionItem.snippetSupport = true
+
+			-- Common on_attach function
+			local on_attach = function(_, bufnr)
+				local opts = { buffer = bufnr, remap = false }
+				local keymap = vim.keymap.set
+
+				-- Diagnostic keymaps
+				keymap("n", "[d", vim.diagnostic.goto_prev, opts)
+				keymap("n", "]d", vim.diagnostic.goto_next, opts)
+				keymap("n", "<leader>e", vim.diagnostic.open_float, opts)
+				keymap("n", "<leader>q", vim.diagnostic.setloclist, opts)
+
+				-- LSP keymaps
+				keymap("n", "gD", vim.lsp.buf.declaration, opts)
+				keymap("n", "gd", vim.lsp.buf.definition, opts)
+				keymap("n", "K", vim.lsp.buf.hover, opts)
+				keymap("n", "gi", vim.lsp.buf.implementation, opts)
+				keymap("n", "<C-k>", vim.lsp.buf.signature_help, opts)
+				keymap("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+				keymap("n", "<leader>rn", vim.lsp.buf.rename, opts)
+				keymap("n", "gr", vim.lsp.buf.references, opts)
+			end
+
+			-- Server configurations
+			local servers = {
+				lua_ls = {
+					settings = {
+						Lua = {
+							runtime = { version = "LuaJIT" },
+							diagnostics = { globals = { "vim" } },
+							workspace = { checkThirdParty = false },
+							telemetry = { enable = false },
+						},
+					},
+				},
+				ruff = {
+					init_options = {
+						settings = {
+							lint = { enable = true },
+							format = { enable = true },
+						},
+					},
+				},
+				pyright = {
+					settings = {
+						pyright = { disableOrganizeImports = true },
+						python = {
+							analysis = {
+								typeCheckingMode = "basic",
+								autoSearchPaths = true,
+								useLibraryCodeForTypes = true,
+							},
+						},
+					},
+				},
+				clangd = {
+					cmd = { "clangd", "--background-index", "--clang-tidy" },
+				},
+			}
+
+			-- Setup Mason LSP config
+			require("mason-lspconfig").setup({
+				ensure_installed = vim.tbl_keys(servers),
+				handlers = {
+					function(server_name)
+						local config = vim.tbl_deep_extend("force", {
+							capabilities = capabilities,
+							on_attach = on_attach,
+						}, servers[server_name] or {})
+
+						require("lspconfig")[server_name].setup(config)
+					end,
+				},
 			})
-			lspconfig.clangd.setup({
-				capabilities = capabilities,
-				cmd = { "clangd", "--compile-commands-dir=./" },
-			})
-			vim.keymap.set("n", "gD", vim.lsp.buf.declaration, {})
-			vim.keymap.set("n", "gd", vim.lsp.buf.definition, {})
-			vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
-			vim.keymap.set("n", "gi", vim.lsp.buf.implementation, {})
-			vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, {})
-			vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, {})
-			vim.keymap.set("n", "<space>wa", vim.lsp.buf.add_workspace_folder, {})
-			vim.keymap.set("n", "<space>wr", vim.lsp.buf.remove_workspace_folder, {})
-			vim.keymap.set("n", "<space>wl", function()
-				print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-			end, {})
-			vim.keymap.set("n", "<space>D", vim.lsp.buf.type_definition, {})
-			vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, {})
-			vim.keymap.set("n", "gr", vim.lsp.buf.references, {})
-			vim.keymap.set("n", "<space>e", vim.diagnostic.open_float, {})
-			vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, {})
-			vim.keymap.set("n", "]d", vim.diagnostic.goto_next, {})
-			vim.keymap.set("n", "<space>q", vim.diagnostic.setloclist, {})
 		end,
 	},
 }
