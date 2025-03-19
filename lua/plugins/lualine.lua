@@ -1,13 +1,13 @@
 return {
-  "nvim-lualine/lualine.nvim",
-  config = function()
-    require("lualine").setup({
-      options = {
-        globalstatus=true,
-        theme = "auto",
-        component_separators = { left = '|', right = '|'},
-        section_separators = "",
-      }
-    })
-  end
+	"nvim-lualine/lualine.nvim",
+	config = function()
+		require("lualine").setup({
+			options = {
+				globalstatus = true,
+				theme = "auto",
+				component_separators = { left = "|", right = "|" },
+				section_separators = "",
+			},
+		})
+	end,
 }

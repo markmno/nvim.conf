@@ -7,6 +7,7 @@ return {
 		-- your configuration comes here
 		-- or leave it empty to use the default settings
 		-- refer to the configuration section below
+		lazygit = { enabled = true },
 		bigfile = { enabled = true },
 		dashboard = { enabled = true },
 		explorer = { enabled = true },
@@ -19,5 +20,6 @@ return {
 		scroll = { enabled = true },
 		statuscolumn = { enabled = true },
 		words = { enabled = true },
+		zen = { enabled = true, show = { statusline = true, tabline = false } },
 	},
 }

@@ -1,6 +1,6 @@
 return {
 	"quarto-dev/quarto-nvim",
-	lazy = false,
+	lazy = "VeryLazy",
 	ft = { "quarto", "markdown" },
 	dev = false,
 	config = function()

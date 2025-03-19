@@ -33,10 +33,10 @@ return {
 			})
 
 			-- Customize virtual text appearance
-			vim.api.nvim_set_hl(0, "DiagnosticVirtualTextError", { fg = "#db4b4b" })
-			vim.api.nvim_set_hl(0, "DiagnosticVirtualTextWarn", { fg = "#e0af68" })
-			vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { fg = "#0db9d7" })
-			vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#10B981" })
+			vim.api.nvim_set_hl(0, "DiagnosticVirtualTextError", { fg = "#bf616a" })
+			vim.api.nvim_set_hl(0, "DiagnosticVirtualTextWarn", { fg = "#b48ead" })
+			vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { fg = "#81a1c1" })
+			vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#ebcb8b" })
 
 			-- Configure LSP capabilities
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()

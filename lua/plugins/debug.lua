@@ -37,7 +37,7 @@ return {
 		require("mason-nvim-dap").setup({
 			automatic_installation = true,
 			handlers = {},
-			ensure_installed = { "delve" },
+			ensure_installed = { "python" },
 		})
 
 		-- Setup DAP UI with minimal icons and controls
