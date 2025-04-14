@@ -22,12 +22,12 @@ return {
 			telescope.load_extension("ui-select")
 
 			local builtin = require("telescope.builtin")
-			vim.keymap.set("n", "<leader>sf", builtin.find_files, { desc = "Find Files" })
-			vim.keymap.set("n", "<leader>sw", builtin.live_grep, { desc = "Live Grep" })
-			vim.keymap.set("n", "<leader>sb", builtin.buffers, { desc = "Buffers" })
-			vim.keymap.set("n", "<leader>sh", builtin.help_tags, { desc = "Help Tags" })
-			vim.keymap.set("n", "<leader>so", builtin.oldfiles, { desc = "Old Files" })
-			vim.keymap.set("n", "<leader>sz", builtin.current_buffer_fuzzy_find, { desc = "Fuzzy Find in Buffer" })
+			vim.keymap.set("n", "<leader>/f", builtin.find_files, { desc = "Find Files" })
+			vim.keymap.set("n", "<leader>//", builtin.live_grep, { desc = "Live Grep" })
+			vim.keymap.set("n", "<leader>/b", builtin.buffers, { desc = "Buffers" })
+			vim.keymap.set("n", "<leader>/h", builtin.help_tags, { desc = "Help Tags" })
+			vim.keymap.set("n", "<leader>/o", builtin.oldfiles, { desc = "Old Files" })
+			vim.keymap.set("n", "<leader>/z", builtin.current_buffer_fuzzy_find, { desc = "Fuzzy Find in Buffer" })
 		end,
 	},
 }

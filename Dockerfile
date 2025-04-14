@@ -54,8 +54,6 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
 RUN git clone https://github.com/quarto-dev/quarto-cli /tmp/quarto-cli && \
   cd /tmp/quarto-cli && ./configure.sh && cd / && rm -rf /tmp/quarto-cli
 
-# --- pyenv installation section removed ---
-
 # Clone Neovim configuration and Tmux plugins (as root, will be copied later)
 RUN git clone https://github.com/markmno/nvim.conf.git /root/.config/nvim && \
   mkdir -p /root/.tmux/plugins && \

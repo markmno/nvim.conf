@@ -42,14 +42,18 @@ return {
 
 			-- Document existing key chains
 			spec = {
+				{ "<leader>s", group = "[S]nacks" },
+				{ "<leader>l", group = "[L]sp" },
+				{ "<leader>a", group = "[A]vante" },
 				{ "<leader>c", group = "[C]ode", mode = { "n", "x" } },
-				{ "<leader>d", group = "[D]ocument" },
+				{ "<leader>d", group = "[D]ebug" },
 				{ "<leader>r", group = "[R]ename" },
-				{ "<leader>s", group = "[S]earch" },
-				{ "<leader>w", group = "[W]orkspace" },
+				{ "<leader>/", group = "[/]Telescope" },
+				-- { "<leader>w", group = "[W]orkspace" },
 				{ "<leader>t", group = "[T]oggle" },
-				{ "<leader>h", group = "Git [H]unk", mode = { "n", "v" } },
-				{ "<leader>z", group = "[Z]en" },
+				{ "<leader>g", group = "[G]it", mode = { "n", "v" } },
+				{ "[", group = "+Prev/Start" },
+				{ "]", group = "+Nexr/End" },
 			},
 		},
 	},
