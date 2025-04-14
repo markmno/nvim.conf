@@ -22,9 +22,11 @@ require("lazy").setup({
 	-- modular approach: using `require 'path/name'` will
 	-- include a plugin definition from file lua/path/name.lua
 
-	require("plugins/autocomplete"),
+	-- require("plugins/autocomplete"),
+	require("plugins/avante"),
+	require("plugins/blink"),
 
-	require("plugins/autopairs"),
+	require("plugins/trouble"),
 
 	require("plugins/bufferline"),
 
@@ -46,6 +48,8 @@ require("lazy").setup({
 
 	require("plugins/lualine"),
 
+	require("plugins/mini"),
+
 	require("plugins/molten"),
 
 	require("plugins/neogen"),
@@ -56,17 +60,13 @@ require("lazy").setup({
 
 	require("plugins/noice"),
 
-	require("plugins/nvimtree"),
-
 	require("plugins/quarto"),
 
 	require("plugins/rainbow-csv"),
 
 	require("plugins/snacks"),
 
-	require("plugins/surround"),
-
-	-- require("plugins/telescope"),
+	require("plugins/telescope"),
 
 	require("plugins/theme"),
 

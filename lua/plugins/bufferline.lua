@@ -5,6 +5,10 @@ return {
 	config = function()
 		require("bufferline").setup({
 			options = {
+				options = {
+					separator_style = "thin",
+				},
+				highlights = require("nord.plugins.bufferline").akinsho(),
 				offsets = {
 					{
 						filetype = "NvimTree",
@@ -14,10 +18,9 @@ return {
 					},
 
 					{
-						filetype = "snacks_picker_list",
-						text = "Explorer",
-						separator = true,
-						text_align = "left",
+						filetype = "snacks_layout_box",
+						text = "󰙅  File Explorer",
+						separator = false,
 					},
 				},
 			},
