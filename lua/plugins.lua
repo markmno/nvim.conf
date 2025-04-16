@@ -28,7 +28,7 @@ require("lazy").setup({
 
 	require("plugins/trouble"),
 
-	require("plugins/bufferline"),
+	-- require("plugins/bufferline"),
 
 	require("plugins/codeium"),
 

@@ -1,6 +1,6 @@
 return {
 	"GCBallesteros/jupytext.nvim",
-	lazy = false,
+	lazy = "VeryLazy",
 	config = function()
 		require("jupytext").setup({
 			style = "markdown",

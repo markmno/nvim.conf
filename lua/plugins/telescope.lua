@@ -1,6 +1,9 @@
+local telescope_prefix = "<leader>/" -- Example: <leader>sn for "snacks"
+
 return {
 	{
 		"nvim-telescope/telescope.nvim",
+		lazy = "VeryLazy",
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"nvim-telescope/telescope-ui-select.nvim", -- added as a dependency
@@ -22,12 +25,17 @@ return {
 			telescope.load_extension("ui-select")
 
 			local builtin = require("telescope.builtin")
-			vim.keymap.set("n", "<leader>/f", builtin.find_files, { desc = "Find Files" })
-			vim.keymap.set("n", "<leader>//", builtin.live_grep, { desc = "Live Grep" })
-			vim.keymap.set("n", "<leader>/b", builtin.buffers, { desc = "Buffers" })
-			vim.keymap.set("n", "<leader>/h", builtin.help_tags, { desc = "Help Tags" })
-			vim.keymap.set("n", "<leader>/o", builtin.oldfiles, { desc = "Old Files" })
-			vim.keymap.set("n", "<leader>/z", builtin.current_buffer_fuzzy_find, { desc = "Fuzzy Find in Buffer" })
+			vim.keymap.set("n", telescope_prefix .. "f", builtin.find_files, { desc = "Find Files" })
+			vim.keymap.set("n", telescope_prefix .. "/", builtin.live_grep, { desc = "Live Grep" })
+			vim.keymap.set("n", telescope_prefix .. "b", builtin.buffers, { desc = "Buffers" })
+			vim.keymap.set("n", telescope_prefix .. "h", builtin.help_tags, { desc = "Help Tags" })
+			vim.keymap.set("n", telescope_prefix .. "o", builtin.oldfiles, { desc = "Old Files" })
+			vim.keymap.set(
+				"n",
+				telescope_prefix .. "z",
+				builtin.current_buffer_fuzzy_find,
+				{ desc = "Fuzzy Find in Buffer" }
+			)
 		end,
 	},
 }

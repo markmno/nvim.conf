@@ -97,19 +97,5 @@ return {
 			end, -- end on_attach
 		},
 	},
-	-- Optional: Add Neogit if you want a Magit-like interface
-	-- {
-	--   "NeogitOrg/neogit",
-	--   dependencies = {
-	--     "nvim-lua/plenary.nvim", -- required
-	--     "sindrets/diffview.nvim", -- optional
-	--     "nvim-telescope/telescope.nvim", -- optional
-	--   },
-	--   config = true, -- Enable default config
-	--   -- Example keymap for Neogit (outside gitsigns on_attach)
-	--   keys = {
-	--      { "<leader>gg", function() require("neogit").open() end, desc = "Neogit" }
-	--   }
-	-- }
 }
 -- vim: ts=2 sts=2 sw=2 et
