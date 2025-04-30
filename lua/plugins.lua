@@ -28,9 +28,15 @@ require("lazy").setup({
 
   require("plugins/trouble"),
 
+<<<<<<< HEAD
   -- require("plugins/bufferline"),
 
   -- require("plugins/codeium"),
+=======
+	-- require("plugins/bufferline"),
+	require("plugins/neotree"),
+	require("plugins/codeium"),
+>>>>>>> b301602 (minor commits)
 
   require("plugins/conform"),
 
