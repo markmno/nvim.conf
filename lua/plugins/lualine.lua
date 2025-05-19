@@ -1,72 +1,134 @@
--- Example configuration using a package manager like lazy.nvim
--- Put this structure within your plugins setup file (e.g., plugins/lualine.lua)
-
+-- lua/plugins/lualine.lua
 return {
 	"nvim-lualine/lualine.nvim",
-	dependencies = { "nvim-tree/nvim-web-devicons" },
+	dependencies = {
+		"nvim-tree/nvim-web-devicons",
+		"SmiteshP/nvim-navic",
+		"NeogitOrg/neogit",
+	},
+	event = "VeryLazy",
 	config = function()
-		-- Define sidebar filetypes (still needed for disabling statusline/winbar)
+		-- 1) Safe-require navic and setup
+		local has_navic, navic = pcall(require, "nvim-navic")
+		if has_navic then
+			navic.setup({
+				highlight = true,
+				separator = "  ",
+				lazy_update_context = true,
+				silence = false,
+			})
+		end
+
+		-- 2) Autocmd to attach navic on LSP attach
+		vim.api.nvim_create_autocmd("LspAttach", {
+			callback = function(args)
+				if not has_navic then
+					return
+				end
+				local client = vim.lsp.get_client_by_id(args.data.client_id)
+				if client.server_capabilities.documentSymbolProvider then
+					navic.attach(client, args.buf)
+				end
+			end,
+		})
+
+		-- 3) Filetypes for which we disable statusline/winbar
 		local sidebar_filetypes = {
 			"NvimTree",
-			-- "snacks_layout_box", -- <-- REPLACE with actual filetype if different
 			"undotree",
 			"Trouble",
+			"snacks_layout_box",
+			"snacks_dashboard",
+			-- "NeogitStatus",
+			-- "NeogitCommitMessage",
+			-- "NeogitPopup",
+			"Avante",
+			"AvanteSelectedFiles",
+			"AvanteInput",
 		}
 
+		-- 4) Lualine setup with winbar under `sections`
 		require("lualine").setup({
 			options = {
 				icons_enabled = true,
 				theme = "auto",
 				component_separators = { left = "", right = "" },
 				section_separators = { left = "", right = "" },
+				globalstatus = true,
 				disabled_filetypes = {
-					statusline = sidebar_filetypes, -- Disable statusline for sidebars
-					winbar = sidebar_filetypes, -- Disable winbar for sidebars
+					statusline = sidebar_filetypes,
+					winbar = sidebar_filetypes,
 				},
-				ignore_focus = {},
-				always_divide_middle = true,
-				globalstatus = true, -- Recommended false for buffer list in statusline
-				-- refresh = {
-				-- 	statusline = 1000,
-				-- 	-- tabline refresh rate is irrelevant now
-				-- 	winbar = 1000,
-				-- },
 			},
-			-- STATUSLINE sections (bottom bar)
+
+			-- statusline (bottom)
 			sections = {
 				lualine_a = { "mode" },
-				-- Put buffers here, maybe alongside branch? Adjust as needed.
-				lualine_b = { "branch", "buffers" }, -- ADDED 'buffers' HERE
-				-- You might remove 'diff' or 'diagnostics' if it gets too crowded
+				lualine_b = { "branch", "buffers" },
 				lualine_c = {},
 				lualine_x = { "diagnostics", "fileformat", "filetype" },
 				lualine_y = { "progress" },
 				lualine_z = { "location" },
+
+				-- winbar (top)
+				winbar = {
+					lualine_a = {},
+					lualine_b = {},
+					lualine_c = {
+						"navic",
+						{
+							navic.get_location,
+							cond = function()
+								return has_navic and navic.is_available()
+							end,
+							on_click = function()
+								vim.cmd("Telescope lsp_document_symbols")
+							end,
+						},
+					},
+					lualine_x = {},
+					lualine_y = {},
+					lualine_z = {},
+				},
+
+				inactive_winbar = {
+					lualine_a = {},
+					lualine_b = {},
+					lualine_c = {},
+					lualine_x = {},
+					lualine_y = {},
+					lualine_z = {},
+				},
 			},
-			inactive_sections = {
-				-- Show inactive filename and location
-				lualine_a = {},
-				lualine_b = {},
-				lualine_c = {},
-				lualine_x = {},
-				lualine_y = {},
-				lualine_z = {},
-				-- Note: Buffers usually only show for the active statusline
+
+			-- per-filetype lualine extensions
+			extensions = {
+				{
+					filetypes = { "NeogitStatus", "NeogitCommitMessage", "NeogitPopup" },
+					sections = {
+						lualine_a = { "mode" },
+						lualine_b = { "branch" },
+						lualine_c = { "filename" },
+						lualine_x = {},
+						lualine_y = {},
+						lualine_z = {},
+					},
+					inactive_sections = {
+						lualine_a = {},
+						lualine_b = { "branch" },
+						lualine_c = { "filename" },
+						lualine_x = {},
+						lualine_y = {},
+						lualine_z = {},
+					},
+				},
+				"fugitive",
+				"quickfix",
+				"nvim-dap-ui",
 			},
-
-			-- TABLINE section is now empty or removed - Lualine won't manage the top bar
-			tabline = {},
-
-			-- WINBAR sections (optional, per-window header)
-			winbar = {},
-			inactive_winbar = {},
-
-			-- EXTENSIONS
-			extensions = { "fugitive", "nvim-dap-ui", "quickfix" },
 		})
 
-		-- Ensure Neovim's native tabline is shown if you still want tabs (0=never, 1=auto, 2=always)
-		vim.opt.showtabline = 1 -- Or 2 if you use native tabs often
-		print("Lualine configured with buffers in the statusline.")
-	end, -- end config function
+		-- 5) Hide native tabline (optional)
+		vim.opt.showtabline = 0
+	end,
 }

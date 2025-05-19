@@ -13,7 +13,7 @@ return {
 		dependencies = {
 			"williamboman/mason.nvim",
 			"neovim/nvim-lspconfig",
-			"hrsh7th/cmp-nvim-lsp",
+			"saghen/blink.cmp",
 		},
 		config = function()
 			-- Configure diagnostics with virtual text
@@ -41,7 +41,7 @@ return {
 			vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#a3be8c" }) -- Green (Adjusted from your original yellow)
 
 			-- Setup LSP capabilities for autocompletion using nvim-cmp
-			local capabilities = require("cmp_nvim_lsp").default_capabilities()
+			local capabilities = require("blink.cmp").get_lsp_capabilities(capabilities)
 			-- Enable snippet support if your completion engine uses it
 			capabilities.textDocument.completion.completionItem.snippetSupport = true
 

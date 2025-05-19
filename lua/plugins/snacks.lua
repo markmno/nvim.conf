@@ -9,7 +9,11 @@ return {
 	opts = {
 		bigfile = { enabled = true },
 		dashboard = { enabled = true },
-		explorer = { enabled = true },
+		explorer = {
+			enabled = true,
+			diagnostics_open = true,
+			git_untracked = false,
+		},
 		indent = { enabled = true },
 		input = { enabled = true },
 		notifier = {
