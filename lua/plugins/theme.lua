@@ -1,11 +1,5 @@
 return {
-<<<<<<< HEAD
-	-- "gbprod/nord.nvim",
 	"shaunsingh/nord.nvim",
-=======
-	"shaunsingh/nord.nvim",
-	-- "shaunsingh/nord.nvim",
->>>>>>> b301602 (minor commits)
 	lazy = false,
 	name = "nord",
 	priority = 1001,
