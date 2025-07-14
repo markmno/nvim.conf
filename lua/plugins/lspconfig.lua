@@ -126,6 +126,7 @@ return {
         },
         ruff = {},
         pyrefly = {},
+        ty = {},
         clangd = {
           cmd = { "clangd", "--background-index", "--clang-tidy" },
         },
