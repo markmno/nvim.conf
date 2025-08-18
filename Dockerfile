@@ -105,5 +105,5 @@ RUN mkdir -p ~/.config/yazi && \
 # Sync Neovim plugins
 RUN nvim --headless "+Lazy! sync" +qa
 
-CMD ["tmux"]
+CMD ["/bin/zsh"]
 
