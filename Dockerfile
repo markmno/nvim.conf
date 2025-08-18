@@ -93,7 +93,8 @@ WORKDIR /home/user
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Install Oh My Zsh & minimal zshrc tweaks
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended && \
+RUN git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh && \
+    cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc && \
     { \
       echo "alias ll='ls -lah --color=auto'"; \
       echo "export LANG=en_US.UTF-8"; \
