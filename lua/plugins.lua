@@ -20,6 +20,7 @@ require("lazy").setup({
   require("plugins/hardtime"),
   require("plugins/vimbegood"),
   require("plugins/opencode"),
+  require("plugins/yazi")
   -- require("plugins/image"),
   -- require("plugins/jupytext"),
   -- require("plugins/molten"),
