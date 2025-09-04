@@ -11,7 +11,6 @@ return {
     local sidebar_filetypes = {
       "NvimTree",
       "undotree",
-      "Trouble",
       "snacks_layout_box",
       "snacks_dashboard",
       "Avante",

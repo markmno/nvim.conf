@@ -11,8 +11,10 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+vim.loader.enable()
 require("vim-options")
 require("plugins")
+require("keymaps")
 require("lsp")
 vim.cmd("runtime! plugin/rplugin.vim")
 package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?/init.lua"

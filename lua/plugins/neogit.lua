@@ -1,5 +1,7 @@
 return {
   "NeogitOrg/neogit",
+  lazy = true,
+  event = "VeryLazy",
   dependencies = {
     "nvim-lua/plenary.nvim",         -- required
     "sindrets/diffview.nvim",        -- optional
@@ -19,11 +21,4 @@ return {
 
     -- Your optional Telescope sorter can remain here
   end,
-  keys = {
-    {
-      "<leader>gg",
-      function() require("neogit").open() end,
-      desc = "Open Neogit",
-    },
-  },
 }

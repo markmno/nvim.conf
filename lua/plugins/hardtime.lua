@@ -1,6 +1,8 @@
 return {
   {
     "m4xshen/hardtime.nvim",
+    lazy = true,
+    event = "VeryLazy",
     opts = {
       max_time = 1000,      -- Time threshold for considering key repeats
       max_count = 3,        -- Max allowed repeated key presses
