@@ -15,7 +15,6 @@ require("lazy").setup({
   require("plugins/which"),
   require("plugins/hardtime"),
   require("plugins/opencode"),
-  require("plugins/yazi"),
   require("plugins/snacks"),
   -- require("plugins/uranus")
   -- require("plugins/molten")

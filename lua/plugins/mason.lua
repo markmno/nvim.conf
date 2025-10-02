@@ -30,13 +30,11 @@ return {
       require("mason-tool-installer").setup({
         ensure_installed = {
           -- Formatters
-          "stylua",      -- Lua formatter
-          "ruff",        -- Python formatter/linter
-          "prettier",    -- Prettier for markdown/json/yaml/toml
-          "shfmt",       -- Shell formatter
-
+          "stylua",   -- Lua formatter
+          "ruff",     -- Python formatter/linter
+          "prettier", -- Prettier for markdown/json/yaml/toml
           -- Debuggers
-          "debugpy",     -- Python debugger (required for DAP)
+          "debugpy",  -- Python debugger (required for DAP)
         },
         auto_update = true,
         run_on_start = true,

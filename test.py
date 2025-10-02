@@ -1,2 +1,3 @@
-import datetime
-datetime.date
+from collections import ChainMap
+
+map = ChainMap()

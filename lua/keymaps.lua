@@ -1,6 +1,5 @@
 -- Telescope keymaps
 local telescope_prefix = "<leader>f"
-
 -- Telescope keymaps (require telescope to be loaded)
 vim.keymap.set("n", telescope_prefix .. "f", function()
   pcall(function() Snacks.picker.files() end)
@@ -74,7 +73,7 @@ _G.setup_gitsigns_keymaps = function(bufnr)
     opts = opts or {}
     opts.buffer = bufnr
     opts.noremap = true -- Set noremap explicitly
-    opts.silent = true -- Make mappings silent by default
+    opts.silent = true  -- Make mappings silent by default
     vim.keymap.set(mode, lhs, rhs, opts)
   end
 
@@ -125,10 +124,10 @@ _G.setup_gitsigns_keymaps = function(bufnr)
 
   -- ========== Toggles (Prefixed with <leader>gs) ==========
   map("n", gs_prefix .. "tb", gitsigns.toggle_current_line_blame, { desc = "Gitsigns: Toggle Line Blame" }) -- Renamed 't' for toggle
-  map("n", gs_prefix .. "td", gitsigns.toggle_deleted, { desc = "Gitsigns: Toggle Deleted Hunks" })        -- Renamed 't' for toggle, 'd' for deleted
-  map("n", gs_prefix .. "tn", gitsigns.toggle_numhl, { desc = "Gitsigns: Toggle Number Highlight" })       -- Add toggle for numhl if used
-  map("n", gs_prefix .. "tl", gitsigns.toggle_linehl, { desc = "Gitsigns: Toggle Line Highlight" })        -- Add toggle for linehl if used
-  map("n", gs_prefix .. "ts", gitsigns.toggle_signs, { desc = "Gitsigns: Toggle Signs Column" })           -- Add toggle for signs
+  map("n", gs_prefix .. "td", gitsigns.toggle_deleted, { desc = "Gitsigns: Toggle Deleted Hunks" })         -- Renamed 't' for toggle, 'd' for deleted
+  map("n", gs_prefix .. "tn", gitsigns.toggle_numhl, { desc = "Gitsigns: Toggle Number Highlight" })        -- Add toggle for numhl if used
+  map("n", gs_prefix .. "tl", gitsigns.toggle_linehl, { desc = "Gitsigns: Toggle Line Highlight" })         -- Add toggle for linehl if used
+  map("n", gs_prefix .. "ts", gitsigns.toggle_signs, { desc = "Gitsigns: Toggle Signs Column" })            -- Add toggle for signs
 
   -- ========== Text Object ==========
   -- These are less likely to conflict but could be prefixed too if desired (e.g., <leader>gsih)
@@ -138,8 +137,10 @@ _G.setup_gitsigns_keymaps = function(bufnr)
 end
 
 -- File Explorer
--- Yazi keymaps
-vim.keymap.set({ "n", "v" }, "<leader>e", "<cmd>Yazi cwd<cr>", { desc = "Open yazi at the current file" })
+-- Snacks explorer keymaps
+vim.keymap.set({ "n", "v" }, "<leader>e", function()
+  Snacks.picker.explorer({ layout = { preset = "default", preview = true } })
+end, { desc = "Snacks Explorer" })
 vim.keymap.set("n", "<c-up>", "<cmd>Yazi toggle<cr>", { desc = "Resume the last yazi session" })
 
 -- Code Actions
@@ -265,7 +266,8 @@ end, { desc = "Open Neogit" })
 -- Diagnostics and LSP
 -- Native diagnostic and LSP keymaps (replacing Trouble)
 vim.keymap.set("n", "<leader>xx", vim.diagnostic.setqflist, { desc = "Diagnostics to quickfix" })
-vim.keymap.set("n", "<leader>xX", function() vim.diagnostic.setqflist({ bufnr = 0 }) end, { desc = "Buffer diagnostics to quickfix" })
+vim.keymap.set("n", "<leader>xX", function() vim.diagnostic.setqflist({ bufnr = 0 }) end,
+  { desc = "Buffer diagnostics to quickfix" })
 vim.keymap.set("n", "<leader>cs", vim.lsp.buf.document_symbol, { desc = "Document symbols" })
 vim.keymap.set("n", "<leader>cws", vim.lsp.buf.workspace_symbol, { desc = "Workspace symbols" })
 vim.keymap.set("n", "<leader>xl", ":lopen<CR>", { desc = "Open location list" })

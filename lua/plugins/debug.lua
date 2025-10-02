@@ -21,6 +21,13 @@ return {
 			local dap = require("dap")
 			dap.set_log_level("WARN")
 
+			-- Python adapter
+			dap.adapters.python = {
+				type = "executable",
+				command = vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python",
+				args = { "-m", "debugpy.adapter" },
+			}
+
 			-- Python configuration
 			dap.configurations.python = {
 				{

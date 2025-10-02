@@ -20,6 +20,7 @@ RUN dnf -y update && \
         kitty ripgrep npm ImageMagick ImageMagick-devel \
         lua luarocks tmux git zsh file procps-ng \
         python3 sqlite-devel \
+        mesa-libGL \
         glibc-langpack-en && \
     ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime && \
     localedef -i en_US -f UTF-8 en_US.UTF-8 || true && \
