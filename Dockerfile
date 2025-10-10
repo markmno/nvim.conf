@@ -49,11 +49,6 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
     cargo install --locked yazi-fm yazi-cli && \
     rm -rf $CARGO_HOME/registry $CARGO_HOME/git
 
-# Install Quarto CLI from source
-RUN git clone --depth=1 https://github.com/quarto-dev/quarto-cli /tmp/quarto-cli && \
-    cd /tmp/quarto-cli && ./configure.sh && \
-    rm -rf /tmp/quarto-cli
-
 # Clone Neovim config & Tmux plugins
 RUN git clone https://github.com/markmno/nvim.conf.git /root/.config/nvim && \
     mkdir -p /root/.tmux/plugins && \
