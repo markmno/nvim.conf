@@ -22,10 +22,10 @@ return {
     event = "VeryLazy",
   },
   {
-    "williamboman/mason.nvim", -- Duplicate to ensure mason-tool-installer loads after mason
     "WhoIsSethDaniel/mason-tool-installer.nvim",
     lazy = true,
     event = "VeryLazy",
+    dependencies = { "williamboman/mason.nvim" },
     config = function()
       require("mason-tool-installer").setup({
         ensure_installed = {

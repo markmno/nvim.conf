@@ -16,7 +16,7 @@ require("lazy").setup({
   require("plugins/opencode"),
   require("plugins/snacks"),
   require("plugins/bufferline"),
-  require("plugins/coach")
+  require("plugins/leetcode")
 })
 --
 -- vim: ts=2 sts=2 sw=2 et

@@ -1,5 +1,6 @@
 return {
   "nvim-treesitter/nvim-treesitter",
+  version = false, -- Use main branch for Neovim 0.11.4 compatibility
   lazy = true,
   event = "BufReadPost",
   build = ":TSUpdate",

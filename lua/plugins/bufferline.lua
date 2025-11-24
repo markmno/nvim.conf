@@ -11,7 +11,7 @@ return {
       },
       highlights = {
         fill = {
-          bg = "#4c566a",
+          bg = "#3b4252",
         },
       },
     })

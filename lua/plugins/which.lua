@@ -204,12 +204,11 @@ return {
         -- Individual keymap registrations
         -- Telescope
         { "<leader>ff",  desc = "Find Files" },
-        { "<leader>f/",  desc = "Live Grep" },
+        { "<leader>fg",  desc = "Live Grep" },
         { "<leader>fb",  desc = "Buffers" },
         { "<leader>fh",  desc = "Help Tags" },
         { "<leader>fo",  desc = "Old Files" },
         { "<leader>fz",  desc = "Fuzzy Find in Buffer" },
-        { "<leader>fg",  desc = "Git Files" },
         { "<leader>fs",  desc = "Git Status" },
         { "<leader>fc",  desc = "Git Commits" },
         { "<leader>fB",  desc = "Git Branches" },

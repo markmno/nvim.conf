@@ -1,56 +1,51 @@
 -- Telescope keymaps
-local telescope_prefix = "<leader>f"
+local picker_prefix = "<leader>f"
 -- Telescope keymaps (require telescope to be loaded)
-vim.keymap.set("n", telescope_prefix .. "f", function()
+vim.keymap.set("n", picker_prefix .. "f", function()
   pcall(function() Snacks.picker.files() end)
 end, { desc = "Find Files" })
 
-vim.keymap.set("n", telescope_prefix .. "/", function()
+vim.keymap.set("n", picker_prefix .. "g", function()
   pcall(function() Snacks.picker.grep() end)
 end, { desc = "Live Grep" })
 
-vim.keymap.set("n", telescope_prefix .. "b", function()
+vim.keymap.set("n", picker_prefix .. "b", function()
   pcall(function() Snacks.picker.buffers() end)
 end, { desc = "Buffers" })
 
-vim.keymap.set("n", telescope_prefix .. "h", function()
+vim.keymap.set("n", picker_prefix .. "h", function()
   pcall(function() Snacks.picker.help() end)
 end, { desc = "Help Tags" })
 
-vim.keymap.set("n", telescope_prefix .. "o", function()
+vim.keymap.set("n", picker_prefix .. "o", function()
   pcall(function() Snacks.picker.recent() end)
 end, { desc = "Old Files" })
 
-vim.keymap.set("n", telescope_prefix .. "z", function()
+vim.keymap.set("n", picker_prefix .. "z", function()
   pcall(function() Snacks.picker.lines() end)
 end, { desc = "Fuzzy Find in Buffer" })
 
-vim.keymap.set("n", telescope_prefix .. "e", function()
+vim.keymap.set("n", picker_prefix .. "e", function()
   pcall(function() Snacks.picker.explorer() end)
 end, { desc = "File Browser" })
 
--- Git integration with Telescope
-vim.keymap.set("n", telescope_prefix .. "g", function()
-  pcall(function() Snacks.picker.git_files() end)
-end, { desc = "Git Files" })
-
-vim.keymap.set("n", telescope_prefix .. "s", function()
+vim.keymap.set("n", picker_prefix .. "s", function()
   pcall(function() Snacks.picker.git_status() end)
 end, { desc = "Git Status" })
 
-vim.keymap.set("n", telescope_prefix .. "c", function()
+vim.keymap.set("n", picker_prefix .. "c", function()
   pcall(function() Snacks.picker.git_log() end)
 end, { desc = "Git Commits" })
 
-vim.keymap.set("n", telescope_prefix .. "B", function()
+vim.keymap.set("n", picker_prefix .. "B", function()
   pcall(function() Snacks.picker.git_branches() end)
 end, { desc = "Git Branches" })
 
-vim.keymap.set("n", telescope_prefix .. "H", function()
+vim.keymap.set("n", picker_prefix .. "H", function()
   pcall(function() Snacks.picker.git_log_file() end)
 end, { desc = "Git File History" })
 
-vim.keymap.set("n", telescope_prefix .. "G", function()
+vim.keymap.set("n", picker_prefix .. "G", function()
   pcall(function() Snacks.picker.git_grep() end)
 end, { desc = "Advanced Git Search" })
 
@@ -142,6 +137,11 @@ vim.keymap.set({ "n", "v" }, "<leader>e", function()
   Snacks.picker.explorer({ layout = { preset = "default", preview = true } })
 end, { desc = "Snacks Explorer" })
 vim.keymap.set("n", "<c-up>", "<cmd>Yazi toggle<cr>", { desc = "Resume the last yazi session" })
+
+-- Buffer Management
+vim.keymap.set("n", "<leader>bd", function()
+  pcall(function() Snacks.bufdelete() end)
+end, { desc = "Delete Buffer" })
 
 -- Code Actions
 -- Native LSP formatting (no plugin needed)
